@@ -1,0 +1,7 @@
+{
+  "name": "AI Medical Assistant",
+  "description": "An AI-powered medical assistant for quick symptom guidance, booking doctor appointments, and shopping for medicines.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
