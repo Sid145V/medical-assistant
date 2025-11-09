@@ -25,13 +25,13 @@ const ContactPage: React.FC = () => {
     }
   };
   
-  const inputClasses = "w-full p-3 border-0 rounded-lg focus:ring-2 focus:ring-primary/40 outline-none bg-black/5 text-text shadow-inner";
+  const inputClasses = "w-full p-3 border-0 rounded-lg focus:ring-2 focus:ring-primary/40 outline-none bg-black/5 dark:bg-black/20 text-text-light dark:text-text-dark shadow-inner placeholder:text-text-muted-light dark:placeholder:text-text-muted-dark";
 
   return (
     <div className="max-w-xl mx-auto">
-      <div className="glass-card p-8">
-        <h1 className="text-3xl font-bold text-center text-text">Contact Us</h1>
-        <p className="text-center text-text-muted mt-2">Have feedback or a question? Let us know!</p>
+      <div className="glass-card p-8 shadow-xl">
+        <h1 className="text-3xl font-bold text-center text-text-light dark:text-text-dark">Contact Us</h1>
+        <p className="text-center text-text-muted-light dark:text-text-muted-dark mt-2">Have feedback or a question? Let us know!</p>
         
         <AnimatePresence>
           {status === 'sent' && (

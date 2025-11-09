@@ -4,7 +4,7 @@ import { Medicine, Order, Shop as ShopType } from '../types';
 import { api } from '../services/mockApi';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const inputClasses = "w-full p-3 border-0 rounded-lg focus:ring-2 focus:ring-primary/40 outline-none bg-black/5 text-text shadow-inner";
+const inputClasses = "w-full p-3 border-0 rounded-lg focus:ring-2 focus:ring-primary/40 outline-none bg-black/5 dark:bg-black/20 text-text-light dark:text-text-dark shadow-inner placeholder:text-text-muted-light dark:placeholder:text-text-muted-dark";
 const Icon = ({ path, className = "h-6 w-6" }: { path: string, className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d={path} />
@@ -52,8 +52,8 @@ const AddItemModal: React.FC<{ onClose: () => void; onAdd: (item: any) => void }
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.95, y: 10, opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="glass-card p-8 w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-6 text-text">Add New Medicine</h2>
+            className="glass-card p-8 w-full max-w-md shadow-xl">
+            <h2 className="text-2xl font-bold mb-6 text-text-light dark:text-text-dark">Add New Medicine</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
                 <input name="name" placeholder="Medicine Name" onChange={handleChange} required className={inputClasses} />
                 <div className="grid grid-cols-2 gap-4">
@@ -61,7 +61,7 @@ const AddItemModal: React.FC<{ onClose: () => void; onAdd: (item: any) => void }
                     <input name="price" type="number" step="0.01" min="0.01" placeholder="Price" onChange={handleChange} required className={inputClasses} />
                 </div>
                  <div>
-                    <label className="block text-sm font-medium text-text-muted mb-1">Product Image</label>
+                    <label className="block text-sm font-medium text-text-muted-light dark:text-text-muted-dark mb-1">Product Image</label>
                     <div className="flex items-center space-x-4">
                       {imagePreview && <img src={imagePreview} alt="preview" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />}
                       <input id="file-upload" name="image" type="file" accept="image/*" onChange={handleFileChange} required className="hidden" />
@@ -71,7 +71,7 @@ const AddItemModal: React.FC<{ onClose: () => void; onAdd: (item: any) => void }
                     </div>
                 </div>
                 <div className="flex justify-end space-x-4 pt-4">
-                    <motion.button type="button" onClick={onClose} className="py-2 px-6 bg-gray-200 rounded-full font-semibold hover:bg-gray-300" whileHover={{scale: 1.05}} whileTap={{scale: 0.95}}>Cancel</motion.button>
+                    <motion.button type="button" onClick={onClose} className="py-2 px-6 bg-gray-200 dark:bg-gray-700 text-text-light dark:text-text-dark rounded-full font-semibold hover:bg-gray-300 dark:hover:bg-gray-600" whileHover={{scale: 1.05}} whileTap={{scale: 0.95}}>Cancel</motion.button>
                     <motion.button type="submit" className="py-2 px-6 bg-primary text-white rounded-full font-bold hover:bg-primary-dark" whileHover={{scale: 1.05}} whileTap={{scale: 0.95}}>Add Item</motion.button>
                 </div>
             </form>
@@ -118,7 +118,7 @@ const ShopDashboard: React.FC = () => {
       items: (
         <div>
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-text">My Inventory</h2>
+                <h2 className="text-2xl font-bold text-text-light dark:text-text-dark">My Inventory</h2>
                 <motion.button 
                     onClick={() => setShowModal(true)} 
                     className="btn-primary py-2 flex items-center space-x-2"
@@ -131,48 +131,48 @@ const ShopDashboard: React.FC = () => {
             {medicines.length > 0 ? (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {medicines.map(med => (
-                        <div key={med.id} className="bg-white/50 p-4 rounded-xl text-center flex flex-col border border-white/30 hover:border-primary/30 transition-all shadow-md hover:shadow-lg">
-                            <div className="relative h-32 flex items-center justify-center mb-2 bg-white/70 rounded-lg overflow-hidden">
+                        <div key={med.id} className="bg-white/50 dark:bg-black/20 p-4 rounded-xl text-center flex flex-col border border-white/30 dark:border-white/10 hover:border-primary/30 transition-all shadow-md hover:shadow-lg">
+                            <div className="relative h-32 flex items-center justify-center mb-2 bg-white/70 dark:bg-black/20 rounded-lg overflow-hidden">
                                 <img src={med.image} alt={med.name} className="max-w-full max-h-full object-contain" loading="lazy" />
                             </div>
-                            <h4 className="font-semibold text-text flex-grow mt-2">{med.name}</h4>
+                            <h4 className="font-semibold text-text-light dark:text-text-dark flex-grow mt-2">{med.name}</h4>
                             <p className="text-primary font-bold mt-1">${med.price.toFixed(2)}</p>
                         </div>
                     ))}
                 </div>
             ) : (
-                 <div className="text-center py-12 text-text-muted">You haven't added any items yet. Add one to get started!</div>
+                 <div className="text-center py-12 text-text-muted-light dark:text-text-muted-dark">You haven't added any items yet. Add one to get started!</div>
             )}
         </div>
       ),
       orders: (
           <div>
-            <h2 className="text-2xl font-bold mb-6 text-text">Incoming Orders</h2>
+            <h2 className="text-2xl font-bold mb-6 text-text-light dark:text-text-dark">Incoming Orders</h2>
             <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
-                  <thead className="border-b-2 border-white/20">
+                  <thead className="border-b-2 border-white/20 dark:border-white/10">
                     <tr>
-                      <th className="py-3 px-4 text-left font-semibold text-text-muted">Item</th>
-                      <th className="py-3 px-4 text-left font-semibold text-text-muted">Qty</th>
-                      <th className="py-3 px-4 text-left font-semibold text-text-muted">Address</th>
-                      <th className="py-3 px-4 text-left font-semibold text-text-muted">Payment</th>
+                      <th className="py-3 px-4 text-left font-semibold text-text-muted-light dark:text-text-muted-dark">Item</th>
+                      <th className="py-3 px-4 text-left font-semibold text-text-muted-light dark:text-text-muted-dark">Qty</th>
+                      <th className="py-3 px-4 text-left font-semibold text-text-muted-light dark:text-text-muted-dark">Address</th>
+                      <th className="py-3 px-4 text-left font-semibold text-text-muted-light dark:text-text-muted-dark">Payment</th>
                     </tr>
                   </thead>
                   <tbody>
                     {orders.length > 0 ? (
                       orders.map(o => (
-                        <tr key={o.id} className="border-b border-white/20 last:border-b-0 hover:bg-black/5 transition-colors group">
-                           <td className="py-4 px-4 font-medium text-text relative">
+                        <tr key={o.id} className="border-b border-white/20 dark:border-white/10 last:border-b-0 hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors group">
+                           <td className="py-4 px-4 font-medium text-text-light dark:text-text-dark relative">
                             <div className="absolute left-0 top-0 h-full w-1 bg-primary transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300 ease-out"></div>
                             {o.medicineName}
                           </td>
-                          <td className="py-4 px-4 text-text-muted">{o.quantity}</td>
-                          <td className="py-4 px-4 text-text-muted truncate max-w-xs">{o.address}</td>
-                          <td className="py-4 px-4 text-text-muted capitalize">{o.paymentMethod.replace('_', ' ')}</td>
+                          <td className="py-4 px-4 text-text-muted-light dark:text-text-muted-dark">{o.quantity}</td>
+                          <td className="py-4 px-4 text-text-muted-light dark:text-text-muted-dark truncate max-w-xs">{o.address}</td>
+                          <td className="py-4 px-4 text-text-muted-light dark:text-text-muted-dark capitalize">{o.paymentMethod.replace('_', ' ')}</td>
                         </tr>
                       ))
                     ) : (
-                        <tr><td colSpan={4} className="text-center py-12 text-text-muted">No orders received yet.</td></tr>
+                        <tr><td colSpan={4} className="text-center py-12 text-text-muted-light dark:text-text-muted-dark">No orders received yet.</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -189,17 +189,17 @@ const ShopDashboard: React.FC = () => {
         className="space-y-8"
     >
         <div>
-            <h1 className="text-3xl font-bold mb-1 text-text">Welcome, {shop.shopName}!</h1>
-            <p className="text-text-muted">{shop.location}</p>
+            <h1 className="text-3xl font-bold mb-1 text-text-light dark:text-text-dark">Welcome, {shop.shopName}!</h1>
+            <p className="text-text-muted-light dark:text-text-muted-dark">{shop.location}</p>
         </div>
 
-      <div className="glass-card p-6">
-          <div className="flex border-b border-white/20 mb-6">
-              <button onClick={() => setActiveTab('items')} className={`py-3 px-6 font-semibold relative transition-colors ${activeTab === 'items' ? 'text-primary' : 'text-text-muted hover:text-text'}`}>
+      <div className="glass-card p-6 shadow-xl">
+          <div className="flex border-b border-white/20 dark:border-white/10 mb-6">
+              <button onClick={() => setActiveTab('items')} className={`py-3 px-6 font-semibold relative transition-colors ${activeTab === 'items' ? 'text-primary' : 'text-text-muted-light dark:text-text-muted-dark hover:text-text-light dark:hover:text-text-dark'}`}>
                   Inventory
                   {activeTab === 'items' && <motion.div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" layoutId="dashboard-underline" />}
               </button>
-              <button onClick={() => setActiveTab('orders')} className={`py-3 px-6 font-semibold relative transition-colors ${activeTab === 'orders' ? 'text-primary' : 'text-text-muted hover:text-text'}`}>
+              <button onClick={() => setActiveTab('orders')} className={`py-3 px-6 font-semibold relative transition-colors ${activeTab === 'orders' ? 'text-primary' : 'text-text-muted-light dark:text-text-muted-dark hover:text-text-light dark:hover:text-text-dark'}`}>
                   Orders
                   {activeTab === 'orders' && <motion.div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" layoutId="dashboard-underline" />}
               </button>
@@ -213,7 +213,7 @@ const ShopDashboard: React.FC = () => {
                 transition={{ duration: 0.2 }}
             >
                 {loading ? (
-                    <div className="text-center py-12 text-text-muted">Loading dashboard...</div>
+                    <div className="text-center py-12 text-text-muted-light dark:text-text-muted-dark">Loading dashboard...</div>
                 ) : content[activeTab]}
             </motion.div>
           </AnimatePresence>

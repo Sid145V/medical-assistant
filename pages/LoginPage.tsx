@@ -54,7 +54,7 @@ const LoginPage: React.FC = () => {
       exit: { opacity: 0, y: -20, transition: { duration: 0.3 } }
   };
   
-  const inputClasses = "w-full p-3 border-0 rounded-lg focus:ring-2 focus:ring-primary/40 outline-none bg-black/5 text-text shadow-inner";
+  const inputClasses = "w-full p-3 border-0 rounded-lg focus:ring-2 focus:ring-primary/40 outline-none bg-black/5 dark:bg-black/20 text-text-light dark:text-text-dark shadow-inner placeholder:text-text-muted-light dark:placeholder:text-text-muted-dark";
   
   const renderSignupFields = () => (
     <div className="space-y-4">
@@ -82,8 +82,8 @@ const LoginPage: React.FC = () => {
           <input name="phone" placeholder="Phone Number" onChange={handleInputChange} required className={inputClasses} />
           <input name="location" placeholder="Location" onChange={handleInputChange} required className={inputClasses} />
           <div>
-              <label className="block text-sm font-medium text-text-muted mb-1">Profile Image</label>
-              <input name="image" type="file" accept="image/*" onChange={handleFileChange} className="w-full text-sm text-text-muted file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+              <label className="block text-sm font-medium text-text-muted-light dark:text-text-muted-dark mb-1">Profile Image</label>
+              <input name="image" type="file" accept="image/*" onChange={handleFileChange} className="w-full text-sm text-text-muted-light dark:text-text-muted-dark file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
           </div>
         </>
       )}
@@ -102,8 +102,8 @@ const LoginPage: React.FC = () => {
   );
 
   return (
-    <div className="max-w-md mx-auto mt-10 glass-card p-8">
-      <h2 className="text-3xl font-bold text-center text-text capitalize">{role} {isLogin ? 'Login' : 'Sign Up'}</h2>
+    <div className="max-w-md mx-auto mt-10 glass-card p-8 shadow-xl">
+      <h2 className="text-3xl font-bold text-center text-text-light dark:text-text-dark capitalize">{role} {isLogin ? 'Login' : 'Sign Up'}</h2>
       <AnimatePresence mode="wait">
         <motion.form 
             key={isLogin ? 'login' : 'signup'}
@@ -133,7 +133,7 @@ const LoginPage: React.FC = () => {
         </motion.form>
        </AnimatePresence>
       {role !== UserRole.ADMIN && (
-        <p className="mt-6 text-center text-sm text-text-muted">
+        <p className="mt-6 text-center text-sm text-text-muted-light dark:text-text-muted-dark">
           {isLogin ? "Don't have an account?" : "Already have an account?"}
           <button onClick={() => setIsLogin(!isLogin)} className="font-medium text-primary hover:text-primary-dark ml-1">
             {isLogin ? 'Sign up' : 'Login'}

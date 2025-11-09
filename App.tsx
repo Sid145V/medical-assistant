@@ -1,6 +1,7 @@
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { SettingsProvider } from './context/SettingsContext';
 import HomePage from './pages/HomePage';
 import GetStartedPage from './pages/GetStartedPage';
 import LoginPage from './pages/LoginPage';
@@ -44,7 +45,7 @@ const AppContent: React.FC = () => {
     const { user } = useAuth();
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen bg-bg-light dark:bg-bg-dark">
             <Header />
             <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
                  <AnimatePresence mode="wait">
@@ -86,7 +87,9 @@ function App() {
   return (
     <HashRouter>
       <AuthProvider>
-        <AppContent />
+        <SettingsProvider>
+            <AppContent />
+        </SettingsProvider>
       </AuthProvider>
     </HashRouter>
   );
