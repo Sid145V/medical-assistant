@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UserRole, Patient, Appointment, Order } from '../types';
 import { api } from '../services/mockApi';
 import { motion, Variants } from 'framer-motion';
+import Hero3D from '../components/Hero3D';
 
 // --- Reusable Icon Component ---
 const Icon = ({ path, className = "h-8 w-8 text-white" }: { path: string, className?: string }) => (
@@ -12,17 +13,11 @@ const Icon = ({ path, className = "h-8 w-8 text-white" }: { path: string, classN
     </svg>
 );
 
-const FallbackSVG = () => (
-    <div className="w-full h-full glass-card shadow-xl overflow-hidden">
-         <img 
-            src="https://storage.googleapis.com/aistudio-project-marketplace-app-samples/ai_doctor_hero_2.png" 
-            alt="AI generated image of a friendly doctor" 
-            className="w-full h-full object-cover object-center"
-            loading="lazy"
-         />
-    </div>
-);
-
+const featureIcons = {
+    chat: "M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193l-3.72 3.72a1.05 1.05 0 01-1.664-1.223l1.242-2.733-3.72-3.72a1.05 1.05 0 01-1.664-1.223l1.242-2.733-3.72-3.72a1.05 1.05 0 01-1.664-1.223l1.242-2.733-3.72-3.72a1.05 1.05 0 01-1.664-1.223l1.242-2.733-3.72-3.72a1.05 1.05 0 01-.028-1.488A1.05 1.05 0 013 3.512v4.286c0 .97.616 1.813 1.5 2.097",
+    appointment: "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18M12 12.75h.008v.008H12v-.008z",
+    shop: "M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c.51 0 .962-.328 1.093-.822l3.482-9.401A1.125 1.125 0 0020.285 3H4.227a1.125 1.125 0 00-1.122 1.026l-1.348 6.404a1.125 1.125 0 001.122 1.274h12.75"
+};
 
 const GuestHome: React.FC = () => {
   const navigate = useNavigate();
@@ -42,31 +37,29 @@ const GuestHome: React.FC = () => {
       transition: { 
         duration: 0.6, 
         ease: "easeOut"
-        // Framer Motion automatically respects `prefers-reduced-motion` by disabling animations.
       } 
     }
   };
 
   return (
     <div className="relative overflow-hidden">
-      <div className="grid md:grid-cols-2 gap-12 items-center min-h-[60vh]">
+      <div className="grid md:grid-cols-2 gap-12 items-center min-h-[70vh]">
         <motion.div 
             className="space-y-6" 
             variants={containerVariants}
             initial="hidden"
             animate="visible"
         >
-          <motion.h1 variants={itemVariants} className="text-4xl md:text-5xl font-display font-extrabold text-text-light dark:text-text-dark leading-tight">
+          <motion.h1 variants={itemVariants} className="text-4xl md:text-6xl font-display font-extrabold text-text-light dark:text-text-dark leading-tight">
             Your Personal AI-Powered Medical Assistant
           </motion.h1>
-          <motion.p variants={itemVariants} className="text-lg text-text-muted-light dark:text-text-muted-dark">
+          <motion.p variants={itemVariants} className="text-lg text-text-muted-light dark:text-text-muted-dark max-w-lg">
             Get AI-powered quick guidance for symptoms, book appointments, and shop for medicines from local pharmacies.
           </motion.p>
           <motion.div variants={itemVariants} className="flex flex-wrap gap-4 pt-4">
             <motion.button 
               onClick={() => navigate('/get-started')} 
-              className="btn-primary"
-              whileHover={{ y: -2, boxShadow: '0 10px 20px rgba(15, 157, 146, 0.25)' }}>
+              className="btn-primary">
               Get Started Now
             </motion.button>
              <motion.button 
@@ -77,12 +70,14 @@ const GuestHome: React.FC = () => {
           </motion.div>
         </motion.div>
         <motion.div 
-          className="h-80 md:h-96"
+          className="h-96 md:h-full"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <FallbackSVG />
+           <Suspense fallback={<div className="w-full h-full bg-primary/10 rounded-2xl animate-pulse" />}>
+               <Hero3D />
+           </Suspense>
         </motion.div>
       </div>
 
@@ -94,21 +89,21 @@ const GuestHome: React.FC = () => {
         variants={containerVariants}
       >
         {[
-          { title: "Chat with AI", desc: "Get instant guidance on your symptoms.", icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
-          { title: "Book Appointment", desc: "Find and schedule a visit with a doctor.", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
-          { title: "Shop Now", desc: "Order medicines from nearby pharmacies.", icon: "M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" }
+          { title: "Chat with AI", desc: "Get instant guidance on your symptoms.", icon: featureIcons.chat },
+          { title: "Book Appointment", desc: "Find and schedule a visit with a doctor.", icon: featureIcons.appointment },
+          { title: "Shop Now", desc: "Order medicines from nearby pharmacies.", icon: featureIcons.shop }
         ].map(item => (
             <motion.div
                 key={item.title}
-                className="glass-card p-8 transition-all transform hover:-translate-y-2 cursor-pointer shadow-lg hover:shadow-xl"
+                className="glass-card p-8 transition-all transform hover:-translate-y-2 cursor-pointer shadow-lg hover:shadow-xl group"
                 onClick={() => navigate('/get-started')}
                 whileHover={{ y: -8 }}
                 variants={itemVariants}
             >
-                <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-dark rounded-full mx-auto flex items-center justify-center mb-4 shadow-lg">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-dark rounded-full mx-auto flex items-center justify-center mb-6 shadow-lg transform transition-transform duration-300 group-hover:scale-110">
                     <Icon path={item.icon} />
                 </div>
-                <h2 className="text-2xl font-bold text-text-light dark:text-text-dark">{item.title}</h2>
+                <h2 className="text-2xl font-bold font-display text-text-light dark:text-text-dark">{item.title}</h2>
                 <p className="mt-2 text-text-muted-light dark:text-text-muted-dark">{item.desc}</p>
             </motion.div>
         ))}
@@ -154,36 +149,36 @@ const PatientHome: React.FC = () => {
   return (
     <div className="space-y-12">
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-text-light dark:text-text-dark">Welcome back, {(user as Patient)?.firstName}!</h1>
+        <h1 className="text-4xl font-bold font-display text-text-light dark:text-text-dark">Welcome back, {(user as Patient)?.firstName}!</h1>
         <p className="text-lg text-text-muted-light dark:text-text-muted-dark mt-2">How can we help you today?</p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-8 text-center">
         {[
-          { title: "Chat with AI", path: "/chatbot", icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
-          { title: "Book Appointment", path: "/book-appointment", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
-          { title: "Shop Now", path: "/shops", icon: "M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" }
+          { title: "Chat with AI", path: "/chatbot", icon: featureIcons.chat },
+          { title: "Book Appointment", path: "/book-appointment", icon: featureIcons.appointment },
+          { title: "Shop Now", path: "/shops", icon: featureIcons.shop }
         ].map(item => (
             <motion.div
                 key={item.title}
-                className="glass-card p-8 transition-all transform hover:-translate-y-2 cursor-pointer shadow-lg hover:shadow-xl"
+                className="glass-card p-8 transition-all transform hover:-translate-y-2 cursor-pointer shadow-lg hover:shadow-xl group"
                 onClick={() => navigate(item.path)}
                 whileHover={{ y: -8 }}
             >
-                <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-dark rounded-full mx-auto flex items-center justify-center mb-4 shadow-lg">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-dark rounded-full mx-auto flex items-center justify-center mb-4 shadow-lg transform transition-transform duration-300 group-hover:scale-110">
                     <Icon path={item.icon} />
                 </div>
-                <h2 className="text-2xl font-bold text-text-light dark:text-text-dark">{item.title}</h2>
+                <h2 className="text-2xl font-bold font-display text-text-light dark:text-text-dark">{item.title}</h2>
             </motion.div>
         ))}
       </div>
       
       <div className="grid md:grid-cols-2 gap-8">
         <div className="glass-card p-6 shadow-lg">
-          <h2 className="text-2xl font-bold mb-4 text-text-light dark:text-text-dark">My Appointments</h2>
-          <div className="space-y-4 max-h-80 overflow-y-auto">
+          <h2 className="text-2xl font-bold mb-4 font-display text-text-light dark:text-text-dark">My Appointments</h2>
+          <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
             {appointments.length > 0 ? appointments.map(app => (
-              <div key={app.id} className="p-4 border rounded-lg flex justify-between items-center bg-white/50 dark:bg-black/20 border-gray-200 dark:border-gray-700">
+              <div key={app.id} className="p-4 border rounded-lg flex justify-between items-center bg-white/50 dark:bg-black/20 border-[var(--border-color)]">
                 <div>
                   <p><strong>Doctor:</strong> {app.doctorName}</p>
                   <p className="text-sm text-text-muted-light dark:text-text-muted-dark"><strong>Date:</strong> {app.date} at {app.time}</p>
@@ -197,10 +192,10 @@ const PatientHome: React.FC = () => {
           </div>
         </div>
         <div className="glass-card p-6 shadow-lg">
-          <h2 className="text-2xl font-bold mb-4 text-text-light dark:text-text-dark">My Orders</h2>
-          <div className="space-y-4 max-h-80 overflow-y-auto">
+          <h2 className="text-2xl font-bold mb-4 font-display text-text-light dark:text-text-dark">My Orders</h2>
+          <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
             {orders.length > 0 ? orders.map(ord => (
-              <div key={ord.id} className="p-4 border rounded-lg bg-white/50 dark:bg-black/20 border-gray-200 dark:border-gray-700">
+              <div key={ord.id} className="p-4 border rounded-lg bg-white/50 dark:bg-black/20 border-[var(--border-color)]">
                 <p><strong>Item:</strong> {ord.medicineName} (x{ord.quantity})</p>
                 <p className="text-sm text-text-muted-light dark:text-text-muted-dark"><strong>Ordered:</strong> {new Date(ord.timestamp).toLocaleDateString()}</p>
                  <p><strong>Status:</strong> <span className="font-semibold capitalize px-2 py-1 text-xs rounded-full text-yellow-800 bg-yellow-100 dark:bg-yellow-900/50 dark:text-yellow-300">Processing</span></p>
@@ -230,7 +225,7 @@ const PatientHome: React.FC = () => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        <Icon path="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" className="h-8 w-8" />
+        <Icon path={featureIcons.chat} className="h-8 w-8" />
       </motion.button>
 
     </div>

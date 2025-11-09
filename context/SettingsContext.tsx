@@ -33,7 +33,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       notification: new Audio(sfxSources.notification),
   }), []);
   
-  Object.values(audioCache).forEach(audio => audio.volume = 0.25);
+  // FIX: Cast the result of Object.values to HTMLAudioElement[] to fix the type error.
+  (Object.values(audioCache) as HTMLAudioElement[]).forEach(audio => audio.volume = 0.25);
 
 
   useEffect(() => {
