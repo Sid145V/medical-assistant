@@ -111,6 +111,24 @@ export const api = {
     return newUser;
   },
   
+  async updateUser(userId: string, updates: Partial<User>): Promise<User> {
+    await simulateDelay(300);
+    const db = getDB();
+    const userIndex = db.users.findIndex((u: User) => u.id === userId);
+    if (userIndex === -1) {
+      throw new Error("User not found");
+    }
+    
+    // Prevent changing role or id
+    const { role, id, ...safeUpdates } = updates as any;
+    
+    const updatedUser = { ...db.users[userIndex], ...safeUpdates };
+    db.users[userIndex] = updatedUser;
+    
+    saveDB(db);
+    return updatedUser;
+  },
+
   async getPatients(): Promise<Patient[]> {
     await simulateDelay();
     return getDB().users.filter((u: User) => u.role === UserRole.PATIENT);

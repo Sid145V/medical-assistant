@@ -17,12 +17,14 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import { UserRole } from './types';
 import { AnimatePresence, motion, Transition } from 'framer-motion';
+import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
 
 
 // --- ROUTING & LAYOUT ---
 const PrivateRoute: React.FC<{ children: React.ReactElement; roles: UserRole[] }> = ({ children, roles }) => {
   const { user } = useAuth();
-  if (!user || !roles.includes(user.role)) {
+  if (!user || (roles.length > 0 && !roles.includes(user.role))) {
     return <Navigate to="/get-started" replace />;
   }
   return children;
@@ -64,6 +66,9 @@ const AppContent: React.FC = () => {
                             <Route path="/about" element={<AboutPage />} />
                             <Route path="/contact" element={<ContactPage />} />
                             <Route path="/shops" element={user && user.role === UserRole.PATIENT ? <ShopPage /> : <Navigate to="/get-started" />} />
+
+                            <Route path="/profile" element={<PrivateRoute roles={[]}><ProfilePage /></PrivateRoute>} />
+                            <Route path="/settings" element={<PrivateRoute roles={[]}><SettingsPage /></PrivateRoute>} />
 
                             <Route path="/chatbot" element={<PrivateRoute roles={[UserRole.PATIENT]}><ChatbotPage /></PrivateRoute>} />
                             <Route path="/book-appointment" element={<PrivateRoute roles={[UserRole.PATIENT]}><AppointmentsPage /></PrivateRoute>} />

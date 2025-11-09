@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { User, UserRole } from '../types';
 import { api, Credentials } from '../services/mockApi';
@@ -9,6 +8,7 @@ interface AuthContextType {
   login: (credentials: Credentials, role: UserRole) => Promise<void>;
   signup: (userData: any, role: UserRole) => Promise<void>;
   logout: () => void;
+  updateAuthUser: (updatedUser: User) => void;
   loading: boolean;
   error: string | null;
 }
@@ -80,7 +80,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     navigate('/');
   }, [navigate]);
 
-  const contextValue = { user, login, signup, logout, loading, error };
+  const updateAuthUser = useCallback((updatedUser: User) => {
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+  }, []);
+
+
+  const contextValue = { user, login, signup, logout, loading, error, updateAuthUser };
 
   return (
     <AuthContext.Provider value={contextValue}>
