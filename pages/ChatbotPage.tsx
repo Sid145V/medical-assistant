@@ -1,12 +1,18 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { getChatbotResponse } from '../services/geminiService';
 import { useAuth } from '../context/AuthContext';
+import { motion } from 'framer-motion';
 
 interface ChatMessage {
   role: 'user' | 'model';
   parts: { text: string }[];
 }
+
+const Icon = ({ path, className = "h-6 w-6" }: { path: string, className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d={path} />
+    </svg>
+);
 
 const ChatbotPage: React.FC = () => {
   const { user } = useAuth();
@@ -16,8 +22,8 @@ const ChatbotPage: React.FC = () => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    chatContainerRef.current?.scrollTo(0, chatContainerRef.current.scrollHeight);
-  }, [history]);
+    chatContainerRef.current?.scrollTo({ top: chatContainerRef.current.scrollHeight, behavior: 'smooth' });
+  }, [history, isLoading]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -34,69 +40,104 @@ const ChatbotPage: React.FC = () => {
     setHistory([...newHistory, modelMessage]);
     setIsLoading(false);
   };
+  
+  const quickSymptomChips = ["Headache", "Fever", "Cough", "Stomach ache"];
 
   const handleNewChat = () => {
     setHistory([]);
   };
 
+  const isEmergency = (text: string) => {
+      const emergencyKeywords = ["chest pain", "difficulty breathing", "severe headache", "numbness", "pregnancy pain", "emergency", "consult a doctor or visit the nearest emergency room"];
+      return emergencyKeywords.some(keyword => text.toLowerCase().includes(keyword));
+  };
+
   return (
-    <div className="flex h-[calc(100vh-150px)]">
-      <div className="w-1/4 bg-gray-100 p-4 border-r flex flex-col">
-        <button 
+    <div className="flex h-[calc(100vh-220px)] glass-card overflow-hidden">
+      <div className="w-1/4 bg-white/50 p-4 border-r border-white/30 flex-col hidden md:flex">
+        <motion.button 
           onClick={handleNewChat} 
-          className="w-full bg-teal-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-600 transition-colors mb-4"
+          className="w-full btn-secondary py-2 flex items-center justify-center space-x-2 mb-4"
+          whileHover={{scale: 1.02}} whileTap={{scale: 0.98}}
         >
-          New Chat
-        </button>
+          <Icon path="M12 4v16m8-8H4" className="h-5 w-5" />
+          <span>New Chat</span>
+        </motion.button>
         <div className="flex-grow overflow-y-auto">
-          <h3 className="font-bold text-gray-700 mb-2">History</h3>
-          {/* History items could be listed here if needed */}
-          <p className="text-sm text-gray-500">Chat history is temporary for this session.</p>
+          <h3 className="font-bold text-text mb-2">History</h3>
+          {history.filter(m => m.role === 'user').slice(-5).reverse().map((msg, i) => (
+              <div key={i} className="p-2 text-sm text-text-muted truncate hover:text-text cursor-pointer rounded-md hover:bg-black/5">{msg.parts[0].text}</div>
+          ))}
+          <p className="text-xs text-text-muted/50 mt-4">Chat history is temporary for this session.</p>
         </div>
       </div>
-      <div className="flex-grow flex flex-col bg-white rounded-lg shadow-md">
-        <div ref={chatContainerRef} className="flex-grow p-6 space-y-4 overflow-y-auto">
+      <div className="flex-grow flex flex-col">
+        <div ref={chatContainerRef} className="flex-grow p-6 space-y-6 overflow-y-auto">
           {history.length === 0 && (
-            <div className="text-center text-gray-500">
-                <p>Welcome, {user?.role === 'patient' && user.firstName}!</p>
+            <div className="text-center text-text-muted/70 flex flex-col items-center justify-center h-full">
+                <Icon path="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" className="h-16 w-16 text-primary/20 mb-4" />
+                <p className="font-semibold text-lg">Welcome, {user?.role === 'patient' && user.firstName}!</p>
                 <p>Ask me about your symptoms. For example, "I have a cough and a sore throat."</p>
             </div>
           )}
-          {history.map((msg, index) => (
-            <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-lg p-3 rounded-xl whitespace-pre-wrap ${msg.role === 'user' ? 'bg-teal-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                {msg.parts[0].text}
-              </div>
-            </div>
-          ))}
+          {history.map((msg, index) => {
+            const isEmergencyMsg = isEmergency(msg.parts[0].text);
+            return (
+                <motion.div 
+                    key={index} 
+                    className={`flex items-end gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                >
+                  {msg.role === 'model' && <div className="w-8 h-8 bg-primary rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-sm shadow-md">AI</div>}
+                   <div className={`relative max-w-lg p-4 rounded-2xl whitespace-pre-wrap ${msg.role === 'user' ? 'bg-gradient-to-br from-primary to-primary-dark text-white rounded-br-none shadow-lg' : 'bg-white/70 text-text rounded-bl-none shadow-md border border-white/50'} ${isEmergencyMsg ? 'bg-accent/20 text-accent-dark border border-accent animate-pulse' : ''}`}>
+                    {msg.parts[0].text}
+                     {isEmergencyMsg && <span className="absolute -top-2 -right-2 flex h-5 w-5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span><span className="relative inline-flex rounded-full h-5 w-5 bg-accent text-white items-center justify-center text-xs">!</span></span>}
+                  </div>
+                </motion.div>
+            )
+           })}
           {isLoading && (
-            <div className="flex justify-start">
-              <div className="max-w-lg p-3 rounded-xl bg-gray-200 text-gray-800">
-                <span className="animate-pulse">Thinking...</span>
+            <motion.div initial={{opacity:0}} animate={{opacity:1}} className="flex items-end gap-2 justify-start">
+               <div className="w-8 h-8 bg-primary rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-sm shadow-md">AI</div>
+              <div className="max-w-lg p-4 rounded-2xl bg-white/70 text-text rounded-bl-none shadow-md">
+                <div className="flex items-center space-x-1">
+                    <motion.div className="w-2 h-2 bg-primary rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }} />
+                    <motion.div className="w-2 h-2 bg-primary rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut", delay: 0.1 }}/>
+                    <motion.div className="w-2 h-2 bg-primary rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}/>
+                </div>
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
-        <div className="p-4 border-t bg-gray-50">
-          <div className="flex items-center space-x-2">
+        <div className="p-4 border-t border-white/30 bg-white/50">
+          <div className="flex gap-2 mb-2">
+            {quickSymptomChips.map(symptom => (
+                <button key={symptom} onClick={() => setInput(symptom)} className="px-3 py-1 text-xs bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition-colors">{symptom}</button>
+            ))}
+          </div>
+          <div className="flex items-center space-x-2 bg-white/80 border border-white/50 rounded-full p-1 focus-within:ring-2 focus-within:ring-primary/50">
+             <button className="p-2 text-text-muted hover:text-primary rounded-full">
+                <Icon path="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" />
+            </button>
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
               placeholder="Type your symptoms here..."
-              className="flex-grow p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="flex-grow p-2 bg-transparent outline-none"
               disabled={isLoading}
             />
-            <button
+            <motion.button
               onClick={handleSend}
               disabled={isLoading || !input.trim()}
-              className="bg-teal-500 text-white p-3 rounded-full hover:bg-teal-600 disabled:bg-gray-300 transition-colors"
+              className="bg-primary text-white p-3 rounded-full hover:bg-primary-dark disabled:bg-gray-300 transition-colors flex-shrink-0"
+               whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-              </svg>
-            </button>
+              <Icon path="M5 10l7-7m0 0l7 7m-7-7v18" />
+            </motion.button>
           </div>
         </div>
       </div>

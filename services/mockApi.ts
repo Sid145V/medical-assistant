@@ -88,8 +88,15 @@ export const api = {
     await simulateDelay();
     const db = getDB();
     
-    if (findUser(db, userData.email) || findUser(db, userData.phone)) {
+    // Explicitly check for email and phone collision to avoid ambiguity with admin username
+    if (userData.email || userData.phone) {
+      const isConflict = db.users.some((u: User) => 
+        u.email === userData.email || u.phone === userData.phone
+      );
+
+      if (isConflict) {
         throw new Error('Email or phone already in use. Please log in.');
+      }
     }
     
     const newUser: User = {
@@ -185,6 +192,21 @@ export const api = {
       return newAppointment;
   },
   
+  async cancelAppointment(appointmentId: string): Promise<Appointment> {
+    await simulateDelay();
+    const db = getDB();
+    const appointment = db.appointments.find((a: Appointment) => a.id === appointmentId);
+    if (!appointment) {
+      throw new Error("Appointment not found");
+    }
+    if (appointment.status !== 'booked') {
+        throw new Error("Only booked appointments can be cancelled.");
+    }
+    appointment.status = 'cancelled';
+    saveDB(db);
+    return appointment;
+  },
+
   async getAppointmentsForPatient(patientId: string): Promise<Appointment[]> {
       await simulateDelay();
       return getDB().appointments.filter((a: Appointment) => a.patientId === patientId);

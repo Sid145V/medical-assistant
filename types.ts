@@ -74,7 +74,7 @@ export interface Appointment {
     doctorName: string;
     date: string;
     time: string;
-    status: 'booked' | 'completed';
+    status: 'booked' | 'completed' | 'cancelled';
 }
 
 export interface Order {

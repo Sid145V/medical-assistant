@@ -25,15 +25,18 @@ You have access to a simulated database of diseases. For any given disease or sy
 For all other queries, adhere to the structured format. Be concise and clear. Do not diagnose. Always include a disclaimer that you are an AI assistant and your advice is not a substitute for professional medical consultation.
 `;
 
+// FIX: Refactored to use ai.models.generateContent for better performance and to follow Gemini API best practices for stateless requests.
 export const getChatbotResponse = async (message: string, history: { role: 'user' | 'model'; parts: { text: string }[] }[]) => {
   try {
-    const chat = ai.chats.create({ 
-        model, 
-        config: { systemInstruction },
-        history,
+    const contents = [...history, { role: 'user', parts: [{ text: message }] }];
+    const response = await ai.models.generateContent({
+      model,
+      contents,
+      config: {
+        systemInstruction,
+      },
     });
-    const result = await chat.sendMessage({ message });
-    return result.text;
+    return response.text;
   } catch (error) {
     console.error("Error getting response from Gemini API:", error);
     return "I'm sorry, I'm having trouble connecting to my knowledge base right now. Please try again later.";

@@ -1,10 +1,11 @@
-
 import React, { useState } from 'react';
 import { api } from '../services/mockApi';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', message: '' });
-  const [isSent, setIsSent] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
+  const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -12,33 +13,59 @@ const ContactPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await api.submitContactForm(formData);
-    setIsSent(true);
-    setFormData({ name: '', phone: '', email: '', message: '' });
-    setTimeout(() => setIsSent(false), 5000);
+    setStatus('sending');
+    setError('');
+    try {
+      await api.submitContactForm(formData);
+      setStatus('sent');
+      setFormData({ name: '', phone: '', email: '', message: '' });
+    } catch(err) {
+      setError('Failed to send message. Please try again.');
+      setStatus('idle');
+    }
   };
+  
+  const inputClasses = "w-full p-3 border-0 rounded-lg focus:ring-2 focus:ring-primary/40 outline-none bg-black/5 text-text shadow-inner";
 
   return (
     <div className="max-w-xl mx-auto">
-      <div className="bg-white p-8 rounded-xl shadow-lg">
-        <h1 className="text-3xl font-bold text-center text-gray-800">Contact Us</h1>
-        <p className="text-center text-gray-500 mt-2">Have feedback or a question? Let us know!</p>
+      <div className="glass-card p-8">
+        <h1 className="text-3xl font-bold text-center text-text">Contact Us</h1>
+        <p className="text-center text-text-muted mt-2">Have feedback or a question? Let us know!</p>
         
-        {isSent && (
-          <div className="mt-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-            <strong className="font-bold">Success!</strong>
-            <span className="block sm:inline"> Your message has been sent. We'll get back to you soon.</span>
-          </div>
-        )}
+        <AnimatePresence>
+          {status === 'sent' && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mt-6 bg-primary/10 border-l-4 border-primary text-primary-dark p-4 rounded-r-lg"
+              role="alert"
+            >
+              <p className="font-bold">Success!</p>
+              <p>Your message has been sent. We'll get back to you soon.</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <input type="text" name="name" placeholder="Name" value={formData.name} onChange={handleChange} required className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
-          <input type="tel" name="phone" placeholder="Phone Number" value={formData.phone} onChange={handleChange} required className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
-          <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
-          <textarea name="message" placeholder="Your Message" value={formData.message} onChange={handleChange} required rows={5} className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
-          <button type="submit" className="w-full bg-teal-500 text-white font-bold py-3 rounded-lg hover:bg-teal-600 transition-colors">
-            Send Message
-          </button>
+          <input type="text" name="name" placeholder="Name" value={formData.name} onChange={handleChange} required className={inputClasses} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <input type="tel" name="phone" placeholder="Phone Number" value={formData.phone} onChange={handleChange} required className={inputClasses} />
+            <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required className={inputClasses} />
+          </div>
+          <textarea name="message" placeholder="Your Message" value={formData.message} onChange={handleChange} required rows={5} className={inputClasses}></textarea>
+          
+          {error && <p className="text-accent text-sm text-center">{error}</p>}
+
+          <motion.button 
+            type="submit"
+            disabled={status === 'sending'}
+            className="w-full btn-primary disabled:bg-gray-400"
+            whileHover={{ y: status !== 'sending' ? -2 : 0 }}
+          >
+            {status === 'sending' ? 'Sending...' : 'Send Message'}
+          </motion.button>
         </form>
       </div>
     </div>

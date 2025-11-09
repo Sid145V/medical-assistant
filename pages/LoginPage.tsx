@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UserRole } from '../types';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const LoginPage: React.FC = () => {
   const { role } = useParams<{ role: UserRole }>();
@@ -17,8 +17,8 @@ const LoginPage: React.FC = () => {
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,7 +31,6 @@ const LoginPage: React.FC = () => {
       reader.readAsDataURL(file);
     }
   };
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,76 +45,98 @@ const LoginPage: React.FC = () => {
       }
     } catch (err) {
       console.error(err);
-      // Error is already handled in AuthContext and displayed
     }
+  };
+
+  const formVariants = {
+      hidden: { opacity: 0, y: 20 },
+      visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+      exit: { opacity: 0, y: -20, transition: { duration: 0.3 } }
   };
   
-  const renderSignupFields = () => {
-    switch (role) {
-      case UserRole.PATIENT:
-        return (
-          <>
-            <input name="firstName" placeholder="First Name" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="lastName" placeholder="Last Name" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="age" type="number" placeholder="Age" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="gender" placeholder="Gender" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="location" placeholder="Location" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="email" type="email" placeholder="Email" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="phone" placeholder="Phone Number" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
+  const inputClasses = "w-full p-3 border-0 rounded-lg focus:ring-2 focus:ring-primary/40 outline-none bg-black/5 text-text shadow-inner";
+  
+  const renderSignupFields = () => (
+    <div className="space-y-4">
+      {role === UserRole.PATIENT && (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <input name="firstName" placeholder="First Name" onChange={handleInputChange} required className={inputClasses} />
+            <input name="lastName" placeholder="Last Name" onChange={handleInputChange} required className={inputClasses} />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <input name="age" type="number" placeholder="Age" onChange={handleInputChange} required className={inputClasses} />
+            <input name="gender" placeholder="Gender" onChange={handleInputChange} required className={inputClasses} />
+          </div>
+          <input name="location" placeholder="Location" onChange={handleInputChange} required className={inputClasses} />
+          <input name="email" type="email" placeholder="Email" onChange={handleInputChange} required className={inputClasses} />
+          <input name="phone" placeholder="Phone Number" onChange={handleInputChange} required className={inputClasses} />
+        </>
+      )}
+      {role === UserRole.DOCTOR && (
+        <>
+          <input name="name" placeholder="Full Name" onChange={handleInputChange} required className={inputClasses} />
+          <input name="qualification" placeholder="Qualification" onChange={handleInputChange} required className={inputClasses} />
+          <input name="experience" type="number" placeholder="Years of Experience" onChange={handleInputChange} required className={inputClasses} />
+          <input name="email" type="email" placeholder="Email" onChange={handleInputChange} required className={inputClasses} />
+          <input name="phone" placeholder="Phone Number" onChange={handleInputChange} required className={inputClasses} />
+          <input name="location" placeholder="Location" onChange={handleInputChange} required className={inputClasses} />
+          <div>
+              <label className="block text-sm font-medium text-text-muted mb-1">Profile Image</label>
+              <input name="image" type="file" accept="image/*" onChange={handleFileChange} className="w-full text-sm text-text-muted file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+          </div>
+        </>
+      )}
+      {role === UserRole.SHOP && (
+         <>
+            <input name="shopName" placeholder="Shop Name" onChange={handleInputChange} required className={inputClasses} />
+            <input name="ownerName" placeholder="Owner Name" onChange={handleInputChange} required className={inputClasses} />
+            <input name="phone" placeholder="Phone Number" onChange={handleInputChange} required className={inputClasses} />
+            <input name="email" type="email" placeholder="Email" onChange={handleInputChange} required className={inputClasses} />
+            <input name="license" placeholder="License No." onChange={handleInputChange} required className={inputClasses} />
+            <input name="yearsActive" type="number" placeholder="Years Active" onChange={handleInputChange} required className={inputClasses} />
+            <input name="location" placeholder="Location" onChange={handleInputChange} required className={inputClasses} />
           </>
-        );
-      case UserRole.DOCTOR:
-        return (
-          <>
-            <input name="name" placeholder="Full Name" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="qualification" placeholder="Qualification" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="experience" type="number" placeholder="Years of Experience" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="email" type="email" placeholder="Email" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="phone" placeholder="Phone Number" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="location" placeholder="Location" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Profile Image</label>
-                <input name="image" type="file" accept="image/*" onChange={handleFileChange} className="w-full p-3 border rounded-lg" />
-            </div>
-          </>
-        );
-      case UserRole.SHOP:
-        return (
-          <>
-            <input name="shopName" placeholder="Shop Name" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="ownerName" placeholder="Owner Name" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="phone" placeholder="Phone Number" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="email" type="email" placeholder="Email" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="license" placeholder="License No." onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="yearsActive" type="number" placeholder="Years Active" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-            <input name="location" placeholder="Location" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-          </>
-        );
-      default:
-        return null;
-    }
-  };
+      )}
+    </div>
+  );
 
   return (
-    <div className="max-w-md mx-auto mt-10 bg-white p-8 rounded-xl shadow-lg">
-      <h2 className="text-3xl font-bold text-center text-gray-800 capitalize">{role} {isLogin ? 'Login' : 'Signup'}</h2>
-      <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-        {isLogin || role === UserRole.ADMIN ? (
-          <input name="identifier" placeholder={role === UserRole.ADMIN ? "Username" : "Email or Phone"} onChange={handleInputChange} required className="w-full p-3 border rounded-lg"/>
-        ) : renderSignupFields()}
-        <input name="password" type="password" placeholder="Password" onChange={handleInputChange} required className="w-full p-3 border rounded-lg" />
-        
-        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+    <div className="max-w-md mx-auto mt-10 glass-card p-8">
+      <h2 className="text-3xl font-bold text-center text-text capitalize">{role} {isLogin ? 'Login' : 'Sign Up'}</h2>
+      <AnimatePresence mode="wait">
+        <motion.form 
+            key={isLogin ? 'login' : 'signup'}
+            variants={formVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onSubmit={handleSubmit} 
+            className="mt-8 space-y-4">
+            
+            {isLogin || role === UserRole.ADMIN ? (
+                <input name="identifier" placeholder={role === UserRole.ADMIN ? "Username" : "Email or Phone"} onChange={handleInputChange} required className={inputClasses}/>
+            ) : renderSignupFields()}
 
-        <button type="submit" disabled={loading} className="w-full bg-teal-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-teal-600 disabled:bg-teal-300 transition-colors">
-          {loading ? 'Processing...' : (isLogin ? 'Login' : 'Signup')}
-        </button>
-      </form>
+            <input name="password" type="password" placeholder="Password" onChange={handleInputChange} required className={inputClasses} />
+            
+            {error && <p className="text-accent text-sm text-center font-semibold">{error}</p>}
+
+            <motion.button 
+                type="submit" 
+                disabled={loading} 
+                className="w-full btn-primary py-3 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                whileHover={{ y: loading ? 0 : -2 }}
+            >
+            {loading ? 'Processing...' : (isLogin ? 'Login' : 'Create Account')}
+            </motion.button>
+        </motion.form>
+       </AnimatePresence>
       {role !== UserRole.ADMIN && (
-        <p className="mt-6 text-center text-sm">
+        <p className="mt-6 text-center text-sm text-text-muted">
           {isLogin ? "Don't have an account?" : "Already have an account?"}
-          <button onClick={() => setIsLogin(!isLogin)} className="font-medium text-teal-600 hover:text-teal-500 ml-1">
-            {isLogin ? 'Signup' : 'Login'}
+          <button onClick={() => setIsLogin(!isLogin)} className="font-medium text-primary hover:text-primary-dark ml-1">
+            {isLogin ? 'Sign up' : 'Login'}
           </button>
         </p>
       )}
