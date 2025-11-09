@@ -3,11 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UserRole } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useToast } from '../context/ToastContext';
 
 const LoginPage: React.FC = () => {
   const { role } = useParams<{ role: UserRole }>();
   const navigate = useNavigate();
   const { login, signup, loading, error } = useAuth();
+  const { showToast } = useToast();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState<any>({});
   
@@ -39,7 +41,7 @@ const LoginPage: React.FC = () => {
         await login({ identifier: formData.identifier, password: formData.password }, role);
       } else {
         await signup(formData, role);
-        alert('Signup successful! Please log in.');
+        showToast('✅ Signup successful! Please log in.', 'success');
         setIsLogin(true);
         setFormData({});
       }
@@ -76,7 +78,23 @@ const LoginPage: React.FC = () => {
       {role === UserRole.DOCTOR && (
         <>
           <input name="name" placeholder="Full Name" onChange={handleInputChange} required className={inputClasses} />
-          <input name="qualification" placeholder="Qualification" onChange={handleInputChange} required className={inputClasses} />
+          <input name="qualification" placeholder="Qualification (e.g., MD, MBBS)" onChange={handleInputChange} required className={inputClasses} />
+           <input 
+                name="specialization" 
+                placeholder="Specialization (e.g., Cardiologist)" 
+                onChange={handleInputChange} 
+                required 
+                className={inputClasses} 
+            />
+            <input 
+                name="license" 
+                placeholder="License Number (e.g., ABCD1998)" 
+                onChange={handleInputChange} 
+                required 
+                pattern="^[A-Z]{4}[0-9]{4}$"
+                title="License must be 4 uppercase letters followed by 4 digits"
+                className={inputClasses} 
+            />
           <input name="experience" type="number" placeholder="Years of Experience" onChange={handleInputChange} required className={inputClasses} />
           <input name="email" type="email" placeholder="Email" onChange={handleInputChange} required className={inputClasses} />
           <input name="phone" placeholder="Phone Number" onChange={handleInputChange} required className={inputClasses} />

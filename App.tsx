@@ -19,6 +19,17 @@ import { UserRole } from './types';
 import { AnimatePresence, motion, Transition } from 'framer-motion';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
+import ToastProvider from './context/ToastContext';
+import ThemeToggle from './components/ThemeToggle';
+import ErrorPage from './pages/ErrorPage';
+
+// FIX: This seems to be a project-wide TS issue where JSX intrinsic elements are not recognized.
+// Declaring this globally in a central file like App.tsx should resolve it for all standard HTML elements.
+declare global {
+    namespace JSX {
+        interface IntrinsicElements extends React.JSX.IntrinsicElements {}
+    }
+}
 
 
 // --- ROUTING & LAYOUT ---
@@ -77,12 +88,13 @@ const AppContent: React.FC = () => {
                             <Route path="/doctor/dashboard" element={<PrivateRoute roles={[UserRole.DOCTOR]}><DoctorDashboard /></PrivateRoute>} />
                             <Route path="/shop/dashboard" element={<PrivateRoute roles={[UserRole.SHOP]}><ShopDashboard /></PrivateRoute>} />
 
-                            <Route path="*" element={<Navigate to="/" replace />} />
+                            <Route path="*" element={<ErrorPage code={404} />} />
                         </Routes>
                     </motion.div>
                 </AnimatePresence>
             </main>
             <Footer />
+            <ThemeToggle />
         </div>
     );
 };
@@ -93,7 +105,9 @@ function App() {
     <HashRouter>
       <AuthProvider>
         <SettingsProvider>
+          <ToastProvider>
             <AppContent />
+          </ToastProvider>
         </SettingsProvider>
       </AuthProvider>
     </HashRouter>

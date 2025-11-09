@@ -1,6 +1,20 @@
 import React, { useRef, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+// FIX: Explicitly import ThreeElements and extend the JSX namespace to fix type errors.
+// This helps TypeScript recognize react-three-fiber's custom JSX elements.
+import { Canvas, useFrame, ThreeElements } from '@react-three/fiber';
 import * as THREE from 'three';
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      group: ThreeElements['group']
+      primitive: ThreeElements['primitive']
+      ambientLight: ThreeElements['ambientLight']
+      directionalLight: ThreeElements['directionalLight']
+      pointLight: ThreeElements['pointLight']
+    }
+  }
+}
 
 // A more sophisticated, procedurally generated model fitting the medical theme.
 function DnaHelix(props: any) {

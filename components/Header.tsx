@@ -21,7 +21,7 @@ const Logo = () => (
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
-  const { theme, toggleTheme, isSoundEnabled, toggleSound } = useSettings();
+  const { isSoundEnabled, toggleSound } = useSettings();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -100,9 +100,6 @@ const Header: React.FC = () => {
           </nav>
 
           <div className="flex items-center space-x-1 sm:space-x-2">
-             <motion.button onClick={toggleTheme} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5">
-                <Icon path={theme === 'light' ? "M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" : "M12 3v2.25m6.364.364l-1.591 1.591M21 12h-2.25m-.364 6.364l-1.591-1.591M12 18.75V21m-6.364-.364l1.591-1.591M3 12h2.25m.364-6.364l1.591 1.591M12 6a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z"} className="h-5 w-5 text-text-muted-light dark:text-text-muted-dark" />
-             </motion.button>
              <motion.button onClick={toggleSound} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5">
                 <Icon path={isSoundEnabled ? "M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.757 3.63 8.25 4.51 8.25H6.75z" : "M17.25 9.75L19.5 12m0 0L21.75 14.25M19.5 12L21.75 9.75M19.5 12L17.25 14.25M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.757 3.63 8.25 4.51 8.25H6.75z" } className="h-5 w-5 text-text-muted-light dark:text-text-muted-dark" />
              </motion.button>

@@ -1,15 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/mockApi';
-import { User, UserRole, Patient, Doctor, Shop, Admin } from '../types';
+import { User, UserRole, Patient, Doctor, Shop, Admin, Address } from '../types';
 import { motion } from 'framer-motion';
+import { useToast } from '../context/ToastContext';
 
 const inputClasses = "w-full p-3 border-0 rounded-lg focus:ring-2 focus:ring-primary/40 outline-none bg-black/5 dark:bg-black/20 text-text-light dark:text-text-dark shadow-inner placeholder:text-text-muted-light dark:placeholder:text-text-muted-dark";
 
+const AddressForm: React.FC<{ address: Partial<Address>; onAddressChange: (e: React.ChangeEvent<HTMLInputElement>) => void; }> = ({ address, onAddressChange }) => (
+    <div className="space-y-4">
+        <h3 className="font-semibold text-text-light dark:text-text-dark">Address Details</h3>
+        <input name="address.fullName" placeholder="Full Name" value={address.fullName || ''} onChange={onAddressChange} required className={inputClasses} />
+        <input name="address.building" placeholder="Building/Flat No." value={address.building || ''} onChange={onAddressChange} required className={inputClasses} />
+        <input name="address.street" placeholder="Street / Locality" value={address.street || ''} onChange={onAddressChange} required className={inputClasses} />
+        <div className="grid grid-cols-2 gap-4">
+            <input name="address.city" placeholder="City" value={address.city || ''} onChange={onAddressChange} required className={inputClasses} />
+            <input name="address.pincode" placeholder="Pincode" value={address.pincode || ''} onChange={onAddressChange} required className={inputClasses} />
+        </div>
+        <input name="address.landmark" placeholder="Landmark (optional)" value={address.landmark || ''} onChange={onAddressChange} className={inputClasses} />
+        <input name="address.phone" placeholder="Phone Number" value={address.phone || ''} onChange={onAddressChange} required className={inputClasses} />
+    </div>
+);
+
+
 const ProfilePage: React.FC = () => {
     const { user, updateAuthUser } = useAuth();
+    const { showToast } = useToast();
     const [formData, setFormData] = useState<Partial<User>>({});
-    const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+    const [status, setStatus] = useState<'idle' | 'saving'>('idle');
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     useEffect(() => {
@@ -27,7 +45,19 @@ const ProfilePage: React.FC = () => {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        
+        if (name.startsWith('address.')) {
+            const field = name.split('.')[1];
+            setFormData(prev => ({
+                ...prev,
+                address: {
+                    ...(prev as Patient | Shop).address,
+                    [field]: value,
+                }
+            }));
+        } else {
+             setFormData(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,12 +79,12 @@ const ProfilePage: React.FC = () => {
         try {
             const updatedUser = await api.updateUser(user.id, formData);
             updateAuthUser(updatedUser);
-            setStatus('saved');
-            setTimeout(() => setStatus('idle'), 2000);
+            showToast('✅ Profile updated successfully!', 'success');
         } catch (error) {
             console.error("Failed to update profile:", error);
+            showToast('❌ Failed to save changes.', 'error');
+        } finally {
             setStatus('idle');
-            alert("Failed to save changes. Please try again.");
         }
     };
     
@@ -69,7 +99,8 @@ const ProfilePage: React.FC = () => {
                             <input name="lastName" placeholder="Last Name" value={patient.lastName || ''} onChange={handleInputChange} required className={inputClasses} />
                         </div>
                         <input name="age" type="number" placeholder="Age" value={patient.age || ''} onChange={handleInputChange} required className={inputClasses} />
-                        <input name="location" placeholder="Location" value={patient.location || ''} onChange={handleInputChange} required className={inputClasses} />
+                        <hr className="border-[var(--border-color)]" />
+                        <AddressForm address={patient.address || {}} onAddressChange={handleInputChange} />
                     </>
                 );
             case UserRole.DOCTOR:
@@ -78,6 +109,7 @@ const ProfilePage: React.FC = () => {
                     <>
                         <input name="name" placeholder="Full Name" value={doctor.name || ''} onChange={handleInputChange} required className={inputClasses} />
                         <input name="qualification" placeholder="Qualification" value={doctor.qualification || ''} onChange={handleInputChange} required className={inputClasses} />
+                        <input name="specialization" placeholder="Specialization" value={doctor.specialization || ''} onChange={handleInputChange} required className={inputClasses} />
                         <input name="experience" type="number" placeholder="Years of Experience" value={doctor.experience || ''} onChange={handleInputChange} required className={inputClasses} />
                         <input name="location" placeholder="Location" value={doctor.location || ''} onChange={handleInputChange} required className={inputClasses} />
                          <div>
@@ -98,7 +130,8 @@ const ProfilePage: React.FC = () => {
                     <>
                         <input name="shopName" placeholder="Shop Name" value={shop.shopName || ''} onChange={handleInputChange} required className={inputClasses} />
                         <input name="ownerName" placeholder="Owner Name" value={shop.ownerName || ''} onChange={handleInputChange} required className={inputClasses} />
-                        <input name="location" placeholder="Location" value={shop.location || ''} onChange={handleInputChange} required className={inputClasses} />
+                        <hr className="border-[var(--border-color)]" />
+                        <AddressForm address={shop.address || {}} onAddressChange={handleInputChange} />
                     </>
                 );
             case UserRole.ADMIN:
@@ -114,6 +147,7 @@ const ProfilePage: React.FC = () => {
             <div className="glass-card p-8 shadow-xl">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {renderFields()}
+                     <hr className="border-[var(--border-color)]" />
                     <div className="grid md:grid-cols-2 gap-4">
                        <input name="email" type="email" placeholder="Email" value={formData.email || ''} onChange={handleInputChange} required className={inputClasses} />
                        <input name="phone" placeholder="Phone Number" value={formData.phone || ''} onChange={handleInputChange} required className={inputClasses} />
@@ -124,7 +158,7 @@ const ProfilePage: React.FC = () => {
                         className="w-full btn-primary py-3 disabled:bg-gray-400 disabled:cursor-not-allowed"
                         whileHover={{ y: status === 'saving' ? 0 : -2 }}
                     >
-                        {status === 'saving' ? 'Saving...' : (status === 'saved' ? 'Saved!' : 'Save Changes')}
+                        {status === 'saving' ? 'Saving...' : 'Save Changes'}
                     </motion.button>
                 </form>
             </div>

@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Medicine, Order, Shop as ShopType } from '../types';
 import { api } from '../services/mockApi';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useToast } from '../context/ToastContext';
 
 const inputClasses = "w-full p-3 border-0 rounded-lg focus:ring-2 focus:ring-primary/40 outline-none bg-black/5 dark:bg-black/20 text-text-light dark:text-text-dark shadow-inner placeholder:text-text-muted-light dark:placeholder:text-text-muted-dark";
 const Icon = ({ path, className = "h-6 w-6" }: { path: string, className?: string }) => (
@@ -14,6 +15,14 @@ const Icon = ({ path, className = "h-6 w-6" }: { path: string, className?: strin
 const AddItemModal: React.FC<{ onClose: () => void; onAdd: (item: any) => void }> = ({ onClose, onAdd }) => {
   const [item, setItem] = useState({ name: '', minOrderQuantity: 1, price: 0.01, image: '' });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -37,7 +46,7 @@ const AddItemModal: React.FC<{ onClose: () => void; onAdd: (item: any) => void }
     if (item.name && item.minOrderQuantity > 0 && item.price > 0 && item.image) {
       onAdd(item);
     } else {
-        alert("Please fill out all fields correctly.");
+        showToast("⚠️ Please fill out all fields correctly.", "warning");
     }
   };
   
@@ -52,7 +61,7 @@ const AddItemModal: React.FC<{ onClose: () => void; onAdd: (item: any) => void }
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.95, y: 10, opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="glass-card p-8 w-full max-w-md shadow-xl">
+            className="glass-card p-8 w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto modal-scroll">
             <h2 className="text-2xl font-bold mb-6 text-text-light dark:text-text-dark">Add New Medicine</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
                 <input name="name" placeholder="Medicine Name" onChange={handleChange} required className={inputClasses} />
@@ -82,6 +91,7 @@ const AddItemModal: React.FC<{ onClose: () => void; onAdd: (item: any) => void }
 
 const ShopDashboard: React.FC = () => {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'items' | 'orders'>('items');
   const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -107,6 +117,7 @@ const ShopDashboard: React.FC = () => {
     if (user) {
       const newMedicine = await api.addMedicine({ ...item, shopId: user.id });
       setMedicines(prev => [...prev, newMedicine]);
+      showToast('💊 New medicine added successfully!', 'success');
       setShowModal(false);
     }
   };
@@ -136,7 +147,7 @@ const ShopDashboard: React.FC = () => {
                                 <img src={med.image} alt={med.name} className="max-w-full max-h-full object-contain" loading="lazy" />
                             </div>
                             <h4 className="font-semibold text-text-light dark:text-text-dark flex-grow mt-2">{med.name}</h4>
-                            <p className="text-primary font-bold mt-1">${med.price.toFixed(2)}</p>
+                            <p className="text-primary font-bold mt-1">₹{med.price.toFixed(2)}</p>
                         </div>
                     ))}
                 </div>

@@ -5,6 +5,8 @@ import { UserRole, Patient, Appointment, Order } from '../types';
 import { api } from '../services/mockApi';
 import { motion, Variants } from 'framer-motion';
 import Hero3D from '../components/Hero3D';
+import EmptyState from '../components/EmptyState';
+import { useToast } from '../context/ToastContext';
 
 // --- Reusable Icon Component ---
 const Icon = ({ path, className = "h-8 w-8 text-white" }: { path: string, className?: string }) => (
@@ -115,9 +117,21 @@ const GuestHome: React.FC = () => {
 const PatientHome: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [appointmentToCancel, setAppointmentToCancel] = useState<Appointment | null>(null);
+
+  useEffect(() => {
+    if (appointmentToCancel) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [appointmentToCancel]);
 
   const fetchAppointments = useCallback(() => {
     if (user) api.getAppointmentsForPatient(user.id).then(setAppointments);
@@ -134,11 +148,11 @@ const PatientHome: React.FC = () => {
     if (appointmentToCancel) {
       try {
         await api.cancelAppointment(appointmentToCancel.id);
-        alert('Appointment cancelled successfully!');
+        showToast('✅ Appointment cancelled successfully!', 'success');
         fetchAppointments();
       } catch (error) {
         console.error("Failed to cancel appointment:", error);
-        alert('Failed to cancel appointment. Please try again.');
+        showToast('❌ Failed to cancel appointment.', 'error');
       } finally {
         setAppointmentToCancel(null);
       }
@@ -188,7 +202,7 @@ const PatientHome: React.FC = () => {
                   <motion.button onClick={() => setAppointmentToCancel(app)} className="bg-accent text-white font-bold py-1 px-3 rounded-lg hover:bg-red-600 transition-colors text-sm" whileHover={{scale: 1.05}} whileTap={{scale: 0.95}}>Cancel</motion.button>
                 )}
               </div>
-            )) : <p className="text-text-muted-light dark:text-text-muted-dark text-center py-8">You have no upcoming appointments.</p>}
+            )) : <EmptyState title="No Appointments" message="You have no upcoming appointments." />}
           </div>
         </div>
         <div className="glass-card p-6 shadow-lg">
@@ -200,14 +214,18 @@ const PatientHome: React.FC = () => {
                 <p className="text-sm text-text-muted-light dark:text-text-muted-dark"><strong>Ordered:</strong> {new Date(ord.timestamp).toLocaleDateString()}</p>
                  <p><strong>Status:</strong> <span className="font-semibold capitalize px-2 py-1 text-xs rounded-full text-yellow-800 bg-yellow-100 dark:bg-yellow-900/50 dark:text-yellow-300">Processing</span></p>
               </div>
-            )) : <p className="text-text-muted-light dark:text-text-muted-dark text-center py-8">You have no recent orders.</p>}
+            )) : <EmptyState title="No Orders" message="You have no recent orders." />}
           </div>
         </div>
       </div>
       
       {appointmentToCancel && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
-            <motion.div initial={{scale:0.9, opacity: 0}} animate={{scale:1, opacity: 1}} className="glass-card p-8 w-full max-w-sm text-center shadow-xl">
+            <motion.div 
+              initial={{scale:0.9, opacity: 0}} 
+              animate={{scale:1, opacity: 1}} 
+              className="glass-card p-8 w-full max-w-sm text-center shadow-xl max-h-[90vh] overflow-y-auto modal-scroll"
+            >
                 <h2 className="text-xl font-bold mb-4 text-text-light dark:text-text-dark">Confirm Cancellation</h2>
                 <p className="text-text-muted-light dark:text-text-muted-dark mb-6">Are you sure you want to cancel your appointment with <strong>{appointmentToCancel.doctorName}</strong> on <strong>{appointmentToCancel.date}</strong>?</p>
                 <div className="flex justify-center space-x-4">
